@@ -1,6 +1,5 @@
 // src/App.js
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import _ from 'lodash';
 import { Button, Container, Grid2, Typography } from "@mui/material";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
@@ -13,22 +12,26 @@ const App = () => {
   const [stockDisplayData, setStockDisplayData] = useState(null);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:5000/api/stock/price/AAPL") // Flask
+    fetch("http://127.0.0.1:5000/api/stock/AAPL") // Flask
       .then((response) => response.json())
       .then((data) => {
         if (data.success) {
-          const dates = []
-          const prices = [];
-          _.map(data.data, data => {
-            dates.push(data.dates)
-            prices.push(data.prices)
-          })
-          setStockData({ dates, prices });
-        } else {
-          console.error(data.error);
-        }
-      })
-      .catch((error) => console.error("Error fetching price data:", error));
+        const dates = []
+        const highPrices = [];
+        const lowPrices = [];
+        _.map(data.data, d => {
+          dates.push(d.Date)
+          highPrices.push(d.High)
+          lowPrices.push(d.Low)
+        })
+        setStockData({ dates, highPrices, lowPrices });
+      }
+        else {
+                console.error(data.error);
+              }
+            })
+            .catch((error) => console.error("Error fetching price data:", error));
+
 
       fetch("http://127.0.0.1:5000/api/stock/display/AAPL") // Flask
       .then((response) => response.json())
@@ -44,17 +47,38 @@ const App = () => {
 
   const fetchStockData = async (ticker) => {
     try {
-      const response = await axios.get(`http://127.0.0.1:5000/api/stock/price/${ticker}`);
-      const dates = []
-      const prices = [];
-      _.map(response.data.data, data => {
-        dates.push(data.dates)
-        prices.push(data.prices)
-      })
-      setStockData({ dates, prices });
+      setStockDisplayData(null)
+      fetch(`http://127.0.0.1:5000/api/stock/${ticker}`) // Flask
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+        const dates = []
+        const highPrices = [];
+        const lowPrices = [];
+        _.map(data.data, d => {
+          dates.push(d.Date)
+          highPrices.push(d.High)
+          lowPrices.push(d.Low)
+        })
+        setStockData({ dates, highPrices, lowPrices });
+      }
+        else {
+                console.error(data.error);
+              }
+            })
+            .catch((error) => console.error("Error fetching price data:", error));
 
-      const responseDisplay = await axios.get(`http://127.0.0.1:5000/api/stock/display/${ticker}`);
-      setStockDisplayData(responseDisplay.data.data)
+
+      fetch(`http://127.0.0.1:5000/api/stock/display/${ticker}`) // Flask
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.success) {
+          setStockDisplayData(data.data);
+        } else {
+          console.error(data.error);
+        }
+      })
+      .catch((error) => console.error("Error fetching display data:", error));
     } catch (error) {
       console.error("Error fetching stock data:", error);
     }
@@ -75,7 +99,7 @@ const App = () => {
     <ThemeProvider theme={theme}>
       <div>
         <Container maxWidth="lg" style={{ marginTop: "2rem" }}>
-          <Typography variant="h4" component="h1" gutterBottom style={{ textAlign: "center" }}>
+          <Typography variant="h4" component="h1" gutterBottom>
             Stock Visualizer
           </Typography>
 
@@ -83,7 +107,7 @@ const App = () => {
 
           <Grid2 container spacing={2} style={{ marginTop: "2rem" }}>
             {/* Chart Section */}
-            <Grid2 item xs={12} md={6}>
+            <Grid2 item xs={12} md={8}>
               {stockData ? (
                 <StockChart data={stockData} />
               ) : (

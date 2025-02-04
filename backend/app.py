@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 from flask_cors import CORS
 import yfinance as yf
 import uuid
+import json
 
 app = Flask(__name__)
 CORS(app)  # Enable Cross-Origin Resource Sharing
@@ -45,6 +46,30 @@ def get_stock_price_data(ticker):
         stock_data = [{"dates": date, "prices": price} for date, price in zip(dates, closing_prices)]
             
         return jsonify({"success": True, "data": stock_data})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 400
+
+@app.route("/api/stock/<ticker>", methods=["GET"])
+def get_stock_data(ticker):
+    try:
+        # Define stock symbol and time period
+        # ticker = "AAPL"  # Replace with any stock symbol
+        start_date = "2024-01-01"
+        end_date = "2024-01-31"
+
+        # Fetch historical data from Yahoo Finance
+        stock_data = yf.download(ticker, start=start_date, end=end_date)
+
+        # Prepare the response data
+        response_data = []
+        for index, row in stock_data.iterrows():
+            response_data.append({
+                "Date": index.strftime('%Y-%m-%d'),  # Format the date
+                "High": float(row['High']),
+                "Low": float(row['Low'])
+            })
+
+        return jsonify({"success": True, "data": response_data})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 400
 

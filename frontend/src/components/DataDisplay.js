@@ -8,11 +8,11 @@ const DataDisplay = ({ data }) => {
 
     const columns = [
         { field: "date", headerName: "Date", width: 150 },
-        { field: "open", headerName: "Open", width: 120 },
-        { field: "high", headerName: "High", width: 120 },
-        { field: "low", headerName: "Low", width: 120 },
-        { field: "close", headerName: "Close", width: 120 },
-        { field: "volume", headerName: "Volume", width: 150 }
+        { field: "open", headerName: "Open", width: 180 },
+        { field: "high", headerName: "High", width: 180 },
+        { field: "low", headerName: "Low", width: 180 },
+        { field: "close", headerName: "Close", width: 180 },
+        { field: "volume", headerName: "Volume", width: 100 }
     ];
 
     // Handle search
